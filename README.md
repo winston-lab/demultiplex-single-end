@@ -3,11 +3,11 @@
 
 ## description
 
-A pipeline which demultiplexes paired-end FASTQ files containing libraries with 5' 'inline' barcodes and A-tails (i.e. the barcodes are the first N bases read, followed by a 'T').
+A pipeline which demultiplexes unpaired FASTQ files containing libraries with 5' 'inline' barcodes and A-tails (i.e. the barcodes are the first N bases read, followed by a 'T').
 
-- demultiplexing is done using [fastq-multx](https://github.com/brwnj/fastq-multx), allowing one mismatch to the barcode (including A-tail) and searching read 1 only
-- using [cutadapt](http://cutadapt.readthedocs.io/en/stable/guide.html), pairs of reads where both reads have the barcode are kept, and the barcodes (plus A-tails) are trimmed.
-    - no 3' quality trimming is applied
+- demultiplexing is done using [fastq-multx](https://github.com/brwnj/fastq-multx), allowing one mismatch to the barcode (including A-tail)
+- barcodes with A-tails are removed, but FASTQ files without barcodes removed are also generated. These are suitable for GEO submission, which require demultiplexed but otherwise unmodified files.
+- no 3' quality trimming is applied
 
 ## requirements
 
@@ -19,27 +19,27 @@ A pipeline which demultiplexes paired-end FASTQ files containing libraries with 
 
 ### required files
 
-- Multiplexed paired-end FASTQ files of libraries with 5' 'inline' barcodes and A-tails. This pipeline has only been tested with Illumina data.
+- Multiplexed unpaired FASTQ files of libraries with 5' 'inline' barcodes and A-tails. This pipeline has only been tested with Illumina data.
 
 ## instructions
 
 **0**. Clone this repository.
 
 ```bash
-git clone https://github.com/winston-lab/demultiplex-paired-end.git
+git clone https://github.com/winston-lab/demultiplex-single-end.git
 ```
 
-**1**. Create and activate the `demultiplex_paired_end` virtual environment for the pipeline using conda. The virtual environment creation can take a while.
+**1**. Create and activate the `demultiplex_single_end` virtual environment for the pipeline using conda. The virtual environment creation can take a while.
 
 ```bash
 # navigate into the pipeline directory
-cd demultiplex-paired-end
+cd demultiplex-single-end
 
 # create the demultiplex_paired_end environment
-conda env create -v -f envs/default.yaml
+conda env create -v -f envs/demultiplex.yaml
 
 # activate the environment
-source activate demultiplex_paired_end
+source activate demultiplex_single_end
 
 # to deactivate the environment
 # source deactivate
@@ -55,7 +55,7 @@ cp config_template.yaml config.yaml
 vim config.yaml    # or use your favorite editor
 ```
 
-**3**. With the `demultiplex_paired_end` environment activated, do a dry run of the pipeline to see what files will be created.
+**3**. With the `demultiplex_single_end` environment activated, do a dry run of the pipeline to see what files will be created.
 
 ```bash
 snakemake -p --dry-run
