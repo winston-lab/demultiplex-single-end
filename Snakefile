@@ -8,8 +8,8 @@ localrules: make_barcode_file
 
 rule all:
     input:
-        expand("fastq/{sample}.{read}.fastq.gz", sample=SAMPLES, read = ["r1", "r2"]),
-        expand("fastq/nontrimmed/{sample}-nontrimmed.{read}.fastq.gz", sample=SAMPLES, read = ["r1", "r2"])
+        expand("fastq/{sample}.fastq.gz", sample=SAMPLES),
+        expand("fastq/nontrimmed/{sample}_nontrimmed.fastq.gz", sample=SAMPLES)
 
 # barcodes include the 'A' tail
 rule make_barcode_file:
@@ -22,59 +22,31 @@ rule make_barcode_file:
 
 # demultiplex with fastq-multx (10x faster than cutadapt demultiplexing)
 # allow one mismatch to barcode
-# leave trimming of barcodes to cutadapt step to check for barcode on both reads
+# remove barcodes, including 'A' tail
 rule demultiplex:
     input:
-        r1 = config["r1"],
-        r2 = config["r2"],
+        fastq = config["fastq"],
         barcodes = "fastq/barcodes.tsv"
     output:
-        r1 = expand("fastq/prefilter/{sample}-prefilter.r1.fastq.gz", sample=["unmatched"] + list(SAMPLES.keys())),
-        r2 = expand("fastq/prefilter/{sample}-prefilter.r2.fastq.gz", sample=["unmatched"] + list(SAMPLES.keys()))
+        expand("fastq/{sample}.fastq.gz", sample=["unmatched"] + list(SAMPLES.keys())),
     log:
         "logs/demultiplex.log"
     shell: """
-       (fastq-multx -B {input.barcodes} -b -x -m 1 {input.r1} {input.r2} -o fastq/prefilter/%-prefilter.r1.fastq.gz -o fastq/prefilter/%-prefilter.r2.fastq.gz) &> {log}
+       (fastq-multx -B {input.barcodes} -b -m 1 {input.fastq} -o fastq/%.fastq.gz) &> {log}
         """
 
-# barcode must be present in both reads of a pair
-# remove barcodes, including 'A' tail
-# error rate is set to allow for one mismatch to barcode, disregarding 'A' tail
-# no 3' quality trimming is applied
-rule remove_barcodes:
-    input:
-        r1 = "fastq/prefilter/{sample}-prefilter.r1.fastq.gz",
-        r2 = "fastq/prefilter/{sample}-prefilter.r2.fastq.gz"
-    output:
-        r1 = "fastq/{sample}.r1.fastq.gz",
-        r2 = "fastq/{sample}.r2.fastq.gz"
-    params:
-        barcode = lambda wc: f"^{SAMPLES[wc.sample]}T",
-        error_rate = lambda wc: 1/len(SAMPLES[wc.sample]),
-        overlap = lambda wc: len(SAMPLES[wc.sample])+1
-    threads: config["threads"]
-    log:
-        "logs/remove_barcodes/remove_barcodes_{sample}.log"
-    shell: """
-        (cutadapt --cores={threads} -g {params.barcode} -G {params.barcode} --error-rate={params.error_rate} --no-indels --overlap={params.overlap} --discard-untrimmed --output={output.r1} --paired-output={output.r2} {input.r1} {input.r2}) &> {log}
-        """
-
-# check for barcode in both reads of a pair, as above, but do not trim them
+# check for barcode, as above, but do not trim
 # these files are useful for GEO submission, which requires demultiplexed but unmodified fastq files
 rule check_barcodes_only:
     input:
-        r1 = "fastq/prefilter/{sample}-prefilter.r1.fastq.gz",
-        r2 = "fastq/prefilter/{sample}-prefilter.r2.fastq.gz"
+        fastq = config["fastq"],
+        barcodes = "fastq/barcodes.tsv"
     output:
-        r1 = "fastq/nontrimmed/{sample}-nontrimmed.r1.fastq.gz",
-        r2 = "fastq/nontrimmed/{sample}-nontrimmed.r2.fastq.gz"
-    params:
-        barcode = lambda wc: f"^{SAMPLES[wc.sample]}T",
-        error_rate = lambda wc: 1/len(SAMPLES[wc.sample]),
-        overlap = lambda wc: len(SAMPLES[wc.sample])+1
+        expand("fastq/nontrimmed/{sample}_nontrimmed.fastq.gz", sample=["unmatched"] + list(SAMPLES.keys()))
     threads: config["threads"]
     log:
-        "logs/remove_barcodes/remove_barcodes_{sample}.log"
+        "logs/check_barcodes_only.log"
     shell: """
-        (cutadapt --cores={threads} -g {params.barcode} -G {params.barcode} --error-rate={params.error_rate} --no-indels --overlap={params.overlap} --no-trim --discard-untrimmed --output={output.r1} --paired-output={output.r2} {input.r1} {input.r2}) &> {log}
+       (fastq-multx -B {input.barcodes} -b -x -m 1 {input.fastq} -o fastq/nontrimmed/%_nontrimmed.fastq.gz) &> {log}
         """
+

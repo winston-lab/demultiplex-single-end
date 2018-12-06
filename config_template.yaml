@@ -1,17 +1,42 @@
-
-#provide paths to read1 and read2 fastq files (relative paths are okay)
-r1 : fastq/Undetermined_S0.R1.fastq.gz
-r2 : fastq/Undetermined_S0.R2.fastq.gz
+---
+# path to fastq file to be demultiplexed
+fastq : fastq/spn1-chipseq-1-Undetermined_S0.R1_clean.fastq.gz
 
 samples:
-    wt-1 : GCAGCCTC # [sample name: barcode]
-    wt-2 : TCGCGTAC
-    wt-3 : TATACCGT
-    non-depleted-1 : ATATAGGA
-    non-depleted-2 : AACCGTGT
-    non-depleted-3 : CTCTGTCT
-    depleted-1 : CCATACAC
-    depleted-2 : GTCTACAT
-    depleted-3 : GAGTTAAC
+    non-depleted-Spt6-input-1: ATCACG # [sample name: barcode]
+    non-depleted-Spt6-input-2: GATCAG
+    depleted-Spt6-input-1: CGATGT
+    depleted-Spt6-input-2: TAGCTT
+    non-depleted-Set2-input-1: TTAGGC
+    non-depleted-Set2-input-2: GGCTAC
+    depleted-Set2-input-1: TGACCA
+    depleted-Set2-input-2: CTTGTA
+    non-depleted-Spt6-IP-1: ACAGTG
+    non-depleted-Spt6-IP-2: ATATAGGA
+    depleted-Spt6-IP-1: GCCAAT
+    depleted-Spt6-IP-2: AACCGTGT
+    non-depleted-Set2-IP-1: CAGATC
+    non-depleted-Set2-IP-2: AGGTCAGT
+    depleted-Set2-IP-1: ACTTGA
+    depleted-Set2-IP-2: CTCTGTCT
+    non-depleted-untagged-input-1: CCATACAC
+    non-depleted-untagged-input-2: AACACCTAC
+    depleted-untagged-input-1: CGCATTAA
+    depleted-untagged-input-2: CCTTTACAG
+    non-depleted-Rpb1-IP-1: GTCTACAT
+    non-depleted-Rpb1-IP-2: GGTCCTTGA
+    depleted-Rpb1-IP-1: GAGTTAAC
+    depleted-Rpb1-IP-2: TTGAGTGT
+    non-depleted-H3-IP-1: GCAGCCTC
+    non-depleted-H3-IP-2: ACTAACTGC
+    depleted-H3-IP-1: TCGCGTAC
+    depleted-H3-IP-2: CAGGAGGCG
+    non-depleted-H3K36me3-IP-1: TATACCGT
+    non-depleted-H3K36me3-IP-2: GTTGTCCCA
+    depleted-H3K36me3-IP-1: TGCGGTTA
+    depleted-H3K36me3-IP-2: TGACGCAT
 
 threads : 4 # [INT] maximum number of threads to use when running locally
+
+
+
