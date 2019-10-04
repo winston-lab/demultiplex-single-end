@@ -36,7 +36,7 @@ git clone https://github.com/winston-lab/demultiplex-single-end.git
 cd demultiplex-single-end
 
 # create the demultiplex_paired_end environment
-conda env create -v -f envs/demultiplex.yaml
+conda env create -v -f envs/demultiplex_single_end.yaml
 
 # activate the environment
 source activate demultiplex_single_end
